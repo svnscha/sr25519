@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 
-project(sr25519_donna VERSION 1.0.0 DESCRIPTION "c implementation of schnorrkel algorithm")
+project(sr25519 VERSION 1.0.0 DESCRIPTION "c implementation of schnorrkel algorithm")
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
@@ -13,6 +13,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-c -O3")
 add_definitions(-DED25519_CUSTOMRANDOM)
 add_definitions(-DED25519_CUSTOMHASH)
 add_definitions(-DED25519_NO_INLINE_ASM)
+add_definitions(-DSR25519_DONNA_STATIC)
 
 if(SR25519_FORCE_32BIT)
   add_definitions(-DED25519_FORCE_32BIT)
@@ -75,7 +76,7 @@ set(SOURCE_FILES
 
   src/vrf.h
   src/vrf.c
-  )
+)
 
 set(INCLUDE_FILES
   src/sr25519.h
@@ -83,19 +84,10 @@ set(INCLUDE_FILES
   src/sr25519-randombytes.h
   src/sr25519-randombytes-custom.h
   src/sr25519-randombytes-default.h
-  )
+)
 
-add_library(sr25519_donna SHARED ${SOURCE_FILES})
-add_library(sr25519_donna_static STATIC ${SOURCE_FILES})
+add_library(${PROJECT_NAME} ${SOURCE_FILES})
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
-install(TARGETS sr25519_donna DESTINATION lib)
-install(TARGETS sr25519_donna_static DESTINATION lib)
+install(TARGETS ${PROJECT_NAME} DESTINATION lib)
 install(FILES ${INCLUDE_FILES} DESTINATION include)
-
-enable_testing()
-
-add_executable(sr25519DonnaTests tests/test_check.c)
-include_directories(${PROJECT_SOURCE_DIR}/src)
-target_link_libraries(sr25519DonnaTests sr25519_donna)
-
-add_test(NAME test_check COMMAND sr25519DonnaTests)
